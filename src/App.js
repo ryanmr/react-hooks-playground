@@ -18,6 +18,10 @@ function AppState({ children }) {
       setUsername(username);
       setHasAuth(true);
     },
+    logout: () => {
+      setUsername('');
+      setHasAuth(false);
+    },
   };
 
   return (
@@ -112,9 +116,14 @@ function PermissionGranted({ username, children }) {
     <section className="section permission-granted">
       <div className="container">
         <div>
-          <h3 className="title is-4">Hi {username}</h3>
+          <h3 className="title is-4">Hi {username}!</h3>
+          <hr />
         </div>
         <div>{children}</div>
+        <div>
+          <hr />
+          <SignOutButton>Sign out</SignOutButton>
+        </div>
       </div>
     </section>
   );
@@ -131,6 +140,16 @@ function PermissionDenied() {
   );
 }
 
+function SignOutButton({ children }) {
+  const appContext = useContext(AppContext);
+  const { logout } = appContext.actions;
+  return (
+    <button className="button" onClick={logout}>
+      {children}
+    </button>
+  );
+}
+
 class App extends Component {
   render() {
     return (
@@ -138,7 +157,8 @@ class App extends Component {
         <AppState>
           <SignIn />
           <SuperSecret>
-            You can see this super special secret content now.
+            <h3 className="title is-3">Amazing Content</h3>
+            <p>You can see this super special secret content now.</p>
           </SuperSecret>
         </AppState>
       </div>
