@@ -1,0 +1,9 @@
+.super-secret {
+  border-top: 1px solid #ff0000;
+  border-bottom: 1px solid #ff0000;
+}
+
+.permission-granted {
+  border-top: 1px solid #00ff00;
+  border-bottom: 1px solid #00ff00;
+}

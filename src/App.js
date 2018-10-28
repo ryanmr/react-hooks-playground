@@ -1,31 +1,5 @@
 import React, { Component, useState, useContext } from 'react';
 
-function useInput(initial) {
-  const [value, setValue] = useState(initial);
-  return {
-    value,
-    onChange: e => setValue(e.target.value),
-  };
-}
-
-function FieldComponent({ label, value }) {
-  return (
-    <div>
-      <h1 className="title">{label}</h1>
-      <input
-        style={{
-          border: 0,
-          borderBottom: '1px solid #000',
-        }}
-        className="subtitle"
-        {...useInput(value)}
-      />
-    </div>
-  );
-}
-
-const ThemeContext = React.createContext('#ff0000');
-
 const AppContext = React.createContext({});
 
 function AppState({ children }) {
@@ -40,6 +14,10 @@ function AppState({ children }) {
   const actions = {
     setUsername,
     setHasAuth,
+    login: username => {
+      setUsername(username);
+      setHasAuth(true);
+    },
   };
 
   return (
@@ -54,19 +32,10 @@ function AppState({ children }) {
   );
 }
 
-function UsernameField() {
-  const appContext = useContext(AppContext);
-  const themeContext = useContext(ThemeContext);
-  console.log(appContext);
-  console.log(themeContext);
-
-  return <FieldComponent label="Username" value="" />;
-}
-
 function SignInFormField({ label, value, onChange, ...props }) {
   return (
     <div>
-      <h1 className="title">{label}</h1>
+      <h1 className="title is-4">{label}</h1>
       <input
         {...props}
         style={{
@@ -81,12 +50,29 @@ function SignInFormField({ label, value, onChange, ...props }) {
   );
 }
 
+function SignIn() {
+  return (
+    <section className="section">
+      <div className="container">
+        <SignInForm />
+      </div>
+    </section>
+  );
+}
+
 function SignInForm() {
   const appContext = useContext(AppContext);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
   const setValue = setter => e => setter(e.target.value);
+
+  const handleSignIn = e => {
+    if (username.trim().length === 0 || password.trim().length === 0) {
+      return;
+    }
+    appContext.actions.login(username);
+  };
 
   return (
     <div>
@@ -103,8 +89,45 @@ function SignInForm() {
         onChange={setValue(setPassword)}
       />
       <br />
-      <button className="button">Sign in</button>
+      <button className="button" onClick={handleSignIn}>
+        Sign in
+      </button>
     </div>
+  );
+}
+
+function SuperSecret({ children }) {
+  const appContext = useContext(AppContext);
+  const { hasAuth, username } = appContext.state;
+
+  return hasAuth ? (
+    <PermissionGranted username={username}>{children}</PermissionGranted>
+  ) : (
+    <PermissionDenied />
+  );
+}
+
+function PermissionGranted({ username, children }) {
+  return (
+    <section className="section permission-granted">
+      <div className="container">
+        <div>
+          <h3 className="title is-4">Hi {username}</h3>
+        </div>
+        <div>{children}</div>
+      </div>
+    </section>
+  );
+}
+
+function PermissionDenied() {
+  return (
+    <section className="section super-secret">
+      <div className="container">
+        <h3 className="title is-4">Super Secret</h3>
+        <p>Sign in is required</p>
+      </div>
+    </section>
   );
 }
 
@@ -113,11 +136,10 @@ class App extends Component {
     return (
       <div className="App">
         <AppState>
-          <section className="section">
-            <div className="container">
-              <SignInForm />
-            </div>
-          </section>
+          <SignIn />
+          <SuperSecret>
+            You can see this super special secret content now.
+          </SuperSecret>
         </AppState>
       </div>
     );
